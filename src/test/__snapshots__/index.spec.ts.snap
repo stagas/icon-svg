@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getIconUrl only package + name 1`] = `"https://cdn.jsdelivr.net/npm/feather-icons@4/dist/icons/award.svg"`;
+
+exports[`getIconUrl only package + name 2`] = `"https://cdn.jsdelivr.net/npm/bytesize-icons@1/dist/icons/heart.svg"`;
+
+exports[`getIconUrl package + name + type 1`] = `"https://cdn.jsdelivr.net/npm/flag-svg-collection@1/flags/4x3/gr.svg"`;
+
+exports[`getIconUrl package + name + type adjusts prefix 1`] = `"https://cdn.jsdelivr.net/npm/boxicons@2/svg/solid/bxs-alarm.svg"`;

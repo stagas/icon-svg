@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fetchIconSvg applies strokeWidth 1`] = `"<svg fill=\\"var(--stroke)\\"><path stroke-width=\\"2px\\"  vector-effect=\\"non-scaling-stroke\\"/></svg>"`;
+
+exports[`fetchIconSvg error 1`] = `"<span title=\\"Error loading icon: https://cdn.jsdelivr.net/npm/boxicons@2/svg/logos/bxl-airbnb.svg\\">⚠️</span>"`;
+
+exports[`fetchIconSvg error 2`] = `"https://cdn.jsdelivr.net/npm/boxicons@2/svg/logos/bxl-airbnb.svg: some error"`;
+
+exports[`fetchIconSvg fetches icon 1`] = `"<svg fill=\\"var(--stroke)\\"><path stroke-width=\\"1.33\\" /></svg>"`;
+
+exports[`fetchIconSvg memoizes fetch 1`] = `"<svg fill=\\"var(--stroke)\\"><path stroke-width=\\"1.33\\" /></svg>"`;
+
+exports[`fetchIconSvg memoizes fetch 2`] = `"<svg fill=\\"var(--stroke)\\"><path stroke-width=\\"1.33\\" /></svg>"`;
+
+exports[`fetchIconSvg memoizes fetch 3`] = `"something else"`;
+
+exports[`fetchIconSvg raw 1`] = `"<svg><path stroke-width=\\"1.33\\" /></svg>"`;
