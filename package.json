@@ -3,7 +3,7 @@
   "author": "stagas",
   "short": "stagas/icon-svg",
   "description": "memoized fetch svg icons from many popular icon sets with editor autocomplete and a custom html element ready to use",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "repository": {
     "type": "git",

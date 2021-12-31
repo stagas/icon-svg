@@ -35,7 +35,7 @@ $ npm i icon-svg
 
 ### IconSvgElement
 
-[src/element.ts:67-96](https://github.com/stagas/icon-svg/blob/01ef1b233d0c94d322260ef72d8a559f1f467ed0/src/element.ts#L67-L96 "Source code on GitHub")
+[src/element.ts:67-96](https://github.com/stagas/icon-svg/blob/c56333488a0ecb76356880328c9cbe5a2f626967/src/element.ts#L67-L96 "Source code on GitHub")
 
 **Extends HTMLElement**
 
@@ -72,7 +72,7 @@ icon-svg {
 
 ### fetchIconSvg
 
-[src/fetch.ts:62-107](https://github.com/stagas/icon-svg/blob/01ef1b233d0c94d322260ef72d8a559f1f467ed0/src/fetch.ts#L62-L107 "Source code on GitHub")
+[src/fetch.ts:62-107](https://github.com/stagas/icon-svg/blob/c56333488a0ecb76356880328c9cbe5a2f626967/src/fetch.ts#L62-L107 "Source code on GitHub")
 
 Fetches an SVG icon.
 
@@ -121,7 +121,7 @@ Returns **any** The SVG data as a string
 
 ### getIconUrl
 
-[src/index.ts:27-49](https://github.com/stagas/icon-svg/blob/01ef1b233d0c94d322260ef72d8a559f1f467ed0/src/index.ts#L27-L49 "Source code on GitHub")
+[src/index.ts:27-49](https://github.com/stagas/icon-svg/blob/c56333488a0ecb76356880328c9cbe5a2f626967/src/index.ts#L27-L49 "Source code on GitHub")
 
 Gets the SVG CDN url of an icon.
 
