@@ -13,6 +13,7 @@ export const iconSets = {
   iconoir: 'gh/lucaburgio/iconoir/icons/{icon}.svg',
   iconpark: 'gh/bytedance/IconPark/source/{type}/{icon}.svg',
   material: 'npm/@material-icons/svg@1/svg/{icon}/{kind}.svg',
+  phosphor: 'gh/phosphor-icons/phosphor-icons@1/assets/{type}/{icon}-{type}.svg',
   supertiny: 'npm/super-tiny-icons@0.4.0/images/svg/{icon}.svg',
   tabler: 'npm/@tabler/icons@1/icons/{icon}.svg',
 }

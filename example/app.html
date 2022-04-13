@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='47.2' r='34'%0Afill='transparent' stroke='%23fff' stroke-width='7.5' /%3E%3C/svg%3E"
+      type="image/svg+xml"
+    />
+    <title>app</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        --light: #eee;
+        --dark: #222;
+        --color: var(--dark);
+        --background: var(--light);
+        color: var(--color);
+        background: var(--background)
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body:not(.light) {
+          --color: var(--light);
+          --background: var(--dark);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main></main>
+    <script type="module">const kebab = (s)=>s.replace(/[a-z](?=[A-Z])|[A-Z]+(?=[A-Z][a-z])/g, '$&-').toLowerCase()
+;
+const toCssText = (style)=>{
+    let css = '';
+    for(const key in style)css += kebab(key) + ':' + style[key] + ';';
+    return css;
+};
+const createProp = (doc = html, el, _type, name, value, attrs)=>{
+    switch(name){
+        case 'children':
+        case 'ref':
+            return;
+        case 'style':
+            value = value?.valueOf();
+            if (typeof value === 'object') value = toCssText(value);
+            el.setAttribute('style', value);
+            attrs.style = el.getAttributeNode('style');
+            return;
+    }
+    const attr = name
+    ;
+    value = value?.valueOf();
+    switch(typeof value){
+        case 'string':
+        case 'number':
+            if (doc === svg || !(name in el)) {
+                el.setAttribute(attr, value);
+                attrs[attr] = el.getAttributeNode(attr);
+                return;
+            }
+            break;
+        case 'function':
+            el.setAttribute(attr, '');
+            attrs[attr] = el.getAttributeNode(attr)
+            ;
+            el[name] = value;
+            return;
+    }
+    el[name] = value;
+    if (el.hasAttribute(attr)) attrs[attr] = el.getAttributeNode(attr);
+};
+const propCache = new WeakMap();
+const createProps = (doc, el, type, props = {}, attrs = {}, cacheRef = el)=>{
+    for(const name in props)createProp(doc, el, type, name, props[name], attrs);
+    propCache.set(cacheRef, {
+        props,
+        attrs
+    });
+};
+const updateProps = (doc, el, type, next = {}, cacheRef = el)=>{
+    if (!propCache.has(cacheRef)) return next && createProps(doc, el, type, next, void 0, cacheRef);
+    const c = propCache.get(cacheRef);
+    const { attrs , props  } = c;
+    if (!next) {
+        for(const name in attrs)el.removeAttributeNode(attrs[name]);
+        for(const name3 in props)delete el[name3];
+        propCache.delete(cacheRef);
+        return;
+    }
+    let value;
+    out: for(const name in props){
+        if (!(name in next)) {
+            delete el[name];
+            continue;
+        }
+        value = next[name];
+        switch(name){
+            case 'children':
+            case 'ref':
+                continue out;
+            case 'value':
+                value = value?.valueOf();
+                el[name] !== value && document.activeElement !== el && (el[name] = value);
+                continue out;
+        }
+        value = value?.valueOf()
+        ;
+        if (props[name] !== value) {
+            if (typeof value === 'function') {
+                const attr = name
+                ;
+                props[attr] = el[attr] = value;
+            } else if (!(name in attrs)) {
+                el[name] = value;
+            }
+        }
+    }
+    for(const name1 in attrs){
+        if (!(name1 in next) || next[name1] === false || next[name1] == null) {
+            el.removeAttributeNode(attrs[name1]);
+            delete attrs[name1];
+            continue;
+        }
+        value = next[name1]?.valueOf();
+        switch(name1){
+            case 'style':
+                if (typeof value === 'object') value = toCssText(value);
+                break;
+        }
+        if (props[name1] !== value && typeof value !== 'function') attrs[name1].value = value;
+    }
+    for(const name2 in next){
+        if (!(name2 in attrs) && !(name2 in props)) createProp(doc, el, type, name2, next[name2], attrs);
+    }
+    c.props = next;
+};
+
+const anchor = new Comment();
+const Fragment = Symbol();
+const jsx = (kind, props, key)=>kind === Fragment ? props.children : {
+        kind,
+        props,
+        key
+    }
+;
+const jsxs = jsx;
+let hook;
+const createHook = ()=>function current(fn = current.fn) {
+        const prev = hook;
+        hook = current;
+        hook.fn = fn;
+        fn();
+        hook = prev;
+    }
+;
+let Chunk = class Chunk extends Array {
+    firstChild;
+    dom = [];
+    get last() {
+        return this.dom.at(-1);
+    }
+    get nextSibling() {
+        return this.last?.nextSibling;
+    }
+    appendChild(x) {
+        this.push(x);
+    }
+    after(x) {
+        this.last?.after(x);
+    }
+    save() {
+        this.dom = [
+            ...this
+        ];
+    }
+    remove() {
+        this.dom.forEach((el)=>el.remove()
+        );
+        this.splice(0);
+    }
+    removeChild(x) {
+        const i = this.indexOf(x);
+        ~i && this.splice(i, 1);
+    }
+};
+const { TEXT_NODE , COMMENT_NODE  } = document;
+const html = document.createElement.bind(document);
+const svg = document.createElementNS.bind(document, 'http://www.w3.org/2000/svg');
+const forceArray = (x, withNull)=>Array.isArray(x) ? withNull && !x.length ? [
+        null
+    ] : x : x == null && !withNull ? [] : [
+        x
+    ]
+;
+const flatDom = (arr, res = [])=>{
+    for (const el of arr){
+        if (el.dom) res.push(...flatDom(el.dom));
+        else res.push(el);
+    }
+    return res;
+};
+const prevs = new WeakMap();
+const render = (n, el, doc = html, withNull = false)=>reconcile(el, forceArray(n, withNull), prevs.get(el), doc)
+;
+const reconcile = (parent, nk, pk, doc)=>{
+    if (pk?.running) {
+        console.warn('attempt to reconcile lane which is reconciling');
+        return;
+    }
+    if (pk === nk) nk = [
+        ...nk
+    ];
+    prevs.set(parent, nk);
+    nk.running = true;
+    nk.dom = Array(nk.length);
+    nk.keyed = new Map();
+    nk.mapped = new Map();
+    if (Array.isArray(pk)) {
+        const keep = new Set();
+        for(let i = 0, n, el, p, pel, k, pi; i < nk.length; i++){
+            n = nk[pi = i];
+            k = n?.key;
+            if (k != null) {
+                nk.keyed.set(k, i);
+                pi = pk.keyed.get(k) ?? -1;
+            }
+            p = pk[pi];
+            pel = pk.dom[pi];
+            nk.dom[i] = el = create(doc, n, p, pel);
+            if (el === pel) keep.add(pel);
+        }
+        for (const pel1 of pk.dom){
+            if (!keep.has(pel1)) {
+                if (parent instanceof Chunk) parent.removeChild(pel1);
+                pel1.remove();
+                pk.mapped.get(pel1)?.hook?.onremove?.();
+            }
+        }
+    } else {
+        for(let i = 0, n, el, k; i < nk.length; i++){
+            n = nk[i];
+            k = n?.key;
+            if (k != null) nk.keyed.set(k, i);
+            nk.dom[i] = el = create(doc, n);
+            nk.mapped.set(el, n);
+        }
+    }
+    nk.flatDom = flatDom(nk.dom);
+    if (pk?.flatDom) diff(parent, nk.flatDom, pk.flatDom);
+    else nk.flatDom.forEach((el)=>parent.appendChild(el)
+    );
+    nk.running = false;
+};
+const diff = (parent, n, p, i = 0, len = n.length, el, last)=>{
+    if (parent instanceof Chunk) {
+        for(; i < len; i++){
+            el = n[i];
+            if (i < parent.length) {
+                if (p[i] === el) continue;
+                parent[i] = el;
+            } else {
+                parent.push(el);
+            }
+        }
+        let d = parent.length - len;
+        while(d--)parent.pop();
+    } else {
+        for(; i < len; i++){
+            el = n[i];
+            if (p[i] === el) last = el;
+            else if (!i) parent.insertBefore(last = el, parent.firstChild);
+            else last.after(last = el);
+        }
+    }
+};
+const create = (doc, n, p, pel)=>{
+    let el;
+    switch(typeof n){
+        case 'string':
+        case 'number':
+            if (pel?.nodeType === TEXT_NODE) {
+                if (p != n) pel.nodeValue = n;
+                return pel;
+            }
+            el = new Text(n);
+            return el;
+        case 'object':
+            if (!n) break;
+            if (Array.isArray(n)) {
+                if (pel && Array.isArray(p)) el = pel;
+                else el = new Chunk();
+                reconcile(el, n, p, doc);
+                el.save();
+            } else if (typeof n.kind === 'string') {
+                if (n.kind === 'svg') doc = svg;
+                if (n.props.ref?.current && n.props.ref.current.tagName.toLowerCase() === n.kind && (el = n.props.ref.current) ||
+                pel && p?.kind === n.kind && (el = pel)) {
+                    updateProps(doc, el, n.kind, n.props);
+                } else {
+                    el = doc(n.kind, 'is' in n.props ? {
+                        is: n.props.is
+                    } : void 0);
+                    createProps(doc, el, n.kind, n.props);
+                }
+                if (n.kind === 'foreignObject') doc = html;
+                render(n.props.children, el, doc);
+                if ('ref' in n.props && el !== n.props.ref.current) queueMicrotask(()=>n.props.ref.current = el
+                );
+            } else {
+                let initial = true;
+                if (!((el = pel) && (n.hook = p.hook))) {
+                    el = new Chunk();
+                    n.hook = createHook();
+                }
+                let prevDom;
+                let nextDom;
+                n.hook(()=>{
+                    let next;
+                    if (!initial && !(next = el.nextSibling)) el.after(next = anchor);
+                    render(n.kind(n.props), el, doc, true);
+                    el.save();
+                    if (!initial && next) {
+                        nextDom = flatDom(el);
+                        if (prevDom?.length > 0) {
+                            for(let i = 0, e; i < nextDom.length; i++){
+                                e = nextDom[i];
+                                if (prevDom[i] !== e) next.before(e);
+                            }
+                        } else {
+                            for (const e of nextDom)next.before(e);
+                        }
+                        prevDom = nextDom;
+                        next === anchor && next.remove();
+                    } else {
+                        initial = false;
+                    }
+                });
+            }
+            return el;
+    }
+    if (pel?.nodeType === COMMENT_NODE) return pel;
+    el = new Comment();
+    return el;
+};
+
+const Registry = new WeakMap();
+const fromElement = (Element, options = {})=>{
+    let fn = Registry.get(Element);
+    if (fn) return fn;
+    const tag = 'x-' + Element.name.toLowerCase() + (Math.random() * 10000000 | 0).toString(36);
+    const ctor = class extends Element {
+    };
+    customElements.define(tag, ctor, options);
+    if (options.extends) fn = (props)=>jsx(options.extends, Object.assign(props, {
+            is: tag
+        }), void 0)
+    ;
+    else fn = (props)=>jsx(tag, props, void 0)
+    ;
+    Registry.set(Element, fn);
+    fn.toString = ()=>tag
+    ;
+    return fn;
+};
+
+const accessors = (target, source, fn)=>Object.defineProperties(target, Object.fromEntries(Object.entries(source).map(([key, value])=>{
+        const next = fn(key, value);
+        const prev = Object.getOwnPropertyDescriptor(target, key);
+        if (prev && prev.get && prev.set) {
+            const { get , set  } = next;
+            next.get = ()=>prev.get?.() ?? get()
+            ;
+            next.set = (v)=>{
+                prev.set?.(v);
+                set(prev.get?.() ?? v);
+            };
+        }
+        return [
+            key,
+            {
+                configurable: true,
+                enumerable: true,
+                ...next
+            }
+        ];
+    })))
+;
+
+const Types = new Map([
+    [
+        String,
+        (x)=>x.toString()
+    ],
+    [
+        Number,
+        (x)=>parseFloat(x)
+    ],
+    [
+        Boolean,
+        (x)=>x = x === false ? false : x != null
+    ],
+]);
+const applyProps = (self, data)=>{
+    for (const [key1, value1] of Object.entries(data))if ([
+        String,
+        Number,
+        Boolean
+    ].includes(value1)) data[key1] = void 0;
+    accessors(self, data, (key)=>{
+        const attr = key.toLowerCase();
+        return {
+            get: ()=>data[key]
+            ,
+            set (value) {
+                self.setAttribute(attr, value);
+            }
+        };
+    });
+    return data;
+};
+const attrs = (attrs1)=>(superclass)=>{
+        const types = new Map();
+        const map = new Map();
+        for (const [key2, value] of Object.entries(new attrs1())){
+            const type = value == null ? Types.get(String) : Types.get(value) ?? Types.get(value?.constructor);
+            if (!type) {
+                throw new TypeError(`Attribute "${key2}" is not valid type, must be either: String, Number, Boolean, null, undefined`);
+            }
+            types.set(key2, type);
+            map.set(key2.toLowerCase(), key2);
+        }
+        const observedAttributes = [
+            ...map.keys()
+        ];
+        return class extends superclass {
+            static get observedAttributes() {
+                return observedAttributes.concat(super.observedAttributes ?? []);
+            }
+            #data;
+            constructor(...args){
+                super(...args);
+                this.#data = applyProps(this, new attrs1());
+            }
+            attributeChangedCallback(name, oldValue, newValue) {
+                let key;
+                if (key = map.get(name)) {
+                    const prev = this.#data[key];
+                    const next = types.get(key)(newValue);
+                    if (!Object.is(prev, next)) {
+                        this.#data[key] = next;
+                        this.propertyChangedCallback?.(key, prev, next);
+                    }
+                }
+                super.attributeChangedCallback?.(name, oldValue, newValue);
+            }
+        };
+    }
+;
+
+const shadow = (init = '', html = '')=>(superclass)=>class extends superclass {
+            root = (()=>{
+                const root = this.attachShadow(typeof init === 'object' ? init : {
+                    mode: 'open'
+                });
+                root.innerHTML = typeof init === 'string' ? init : html;
+                return root;
+            })();
+        }
+;
+
+function mixter(a, ...mixins) {
+    return mixins.reduce((c, mixin)=>mixin(c)
+    , a);
+}
+
+const memoize = (fn, map = Object.create(null)) => {
+    const wrapped = function (...args) {
+        const serialized = args.join();
+        return map[serialized] ?? (map[serialized] = fn.apply(this, args));
+    };
+    return wrapped;
+};
+
+const iconSets = {
+    bootstrap: 'npm/bootstrap-icons@1/icons/{icon}.svg',
+    boxicons: 'npm/boxicons@2/svg/{type}/{prefix}-{icon}.svg',
+    bytesize: 'npm/bytesize-icons@1/dist/icons/{icon}.svg',
+    cssgg: 'npm/css.gg@2/icons/svg/{icon}.svg',
+    emojicc: 'npm/emoji-cc@1/svg/{icon}.svg',
+    eos: 'gh/lekoala/eos-icons-mirror/{type}/{icon}.svg',
+    feather: 'npm/feather-icons@4/dist/icons/{icon}.svg',
+    flags: 'npm/flag-svg-collection@1/flags/{kind}/{icon}.svg',
+    fontawesome: 'npm/@fortawesome/fontawesome-free@5/svgs/{type}/{icon}.svg',
+    iconoir: 'gh/lucaburgio/iconoir/icons/{icon}.svg',
+    iconpark: 'gh/bytedance/IconPark/source/{type}/{icon}.svg',
+    material: 'npm/@material-icons/svg@1/svg/{icon}/{kind}.svg',
+    phosphor: 'gh/phosphor-icons/phosphor-icons@1/assets/{type}/{icon}-{type}.svg',
+    supertiny: 'npm/super-tiny-icons@0.4.0/images/svg/{icon}.svg',
+    tabler: 'npm/@tabler/icons@1/icons/{icon}.svg',
+};
+const prefixes = {
+    boxicons: {
+        solid: 'bxs',
+        regular: 'bx',
+        logos: 'bxl',
+    },
+};
+
+const origin = 'https://cdn.jsdelivr.net';
+/**
+ * Gets the SVG CDN url of an icon.
+ *
+ * ```ts
+ * getIconUrl({ set: 'bytesize', icon: 'heart' })
+ * getIconUrl({ set: 'boxicons', icon: 'alarm', type: 'solid' })
+ * getIconUrl({ set: 'flags', icon: 'gr', kind: '4x3' })
+ * ```
+ *
+ * @param props
+ * @param props.set Icon set
+ * @param props.icon Icon name
+ * @param props.type Icon type - Most of the time an entirely different set of icons
+ * @param props.kind Icon kind - These are variations of the same icon
+ * @returns The SVG CDN url
+ */
+const getIconUrl = (props) => {
+    if (!propsSatisfyTemplate(props))
+        throw new TypeError('IconSvg: Missing properties');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prefix = prefixes[props.set]?.[props.type];
+    const values = Object.assign({}, props, { prefix });
+    let url = origin + '/' + iconSets[props.set].replace(/{(.*?)}/g, (_, key) => values[key]);
+    if (props.set === 'phosphor' && props.type === 'regular')
+        url = url.replace('-regular', '');
+    return url;
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const propsSatisfyTemplate = (props) => {
+    if (!('set' in props) || props.set == null)
+        return false;
+    const template = iconSets[props.set];
+    const keys = [...template.matchAll(/{(.*?)}/g)].map(x => x[1]);
+    for (const key of keys) {
+        if (key === 'prefix')
+            continue;
+        if (!(key in props) || props[key] == null)
+            return false;
+    }
+    return true;
+};
+
+const fetchMemoized = memoize(async (url) => {
+    const response = await fetch(url);
+    const text = await response.text();
+    if (response.ok)
+        return text;
+    else {
+        console.error(url + ': ' + text);
+        return `<span title="Error loading icon: ${url}">⚠️</span>`;
+    }
+});
+/**
+ * Fetches an SVG icon.
+ *
+ * The network request is memoized so when this is called multiple times
+ * it will only access the network the first time (or the browser cache if there already).
+ *
+ * It also attempts to normalize the SVG to make all the icons consistent and
+ * usable out of the box without any adjustments, i.e it normalizes various values.
+ *
+ * Use CSS variables `--stroke` `--fill` and `--fill-secondary` to manage
+ * the colors if necessary.
+ *
+ * When used with `strokeWidth` you can achieve fine-control on how it's being displayed.
+ *
+ * Use the `raw` option to skip any post processing if you don't need it and simply get
+ * the raw SVG data.
+ *
+ * ```ts
+ * svg = await fetchIconSvg({ set: 'bytesize', icon: 'heart', strokeWidth: '2px' })
+ * svg = await fetchIconSvg({ set: 'flags', icon: 'gr', kind: '4x3', raw: true })
+ * svg = await fetchIconSvg({
+ *   set: 'boxicons',
+ *   icon: 'alarm',
+ *   type: 'solid',
+ *   strokeWidth: '' // passing `strokeWidth=''` allows it to be managed in CSS
+ * })
+ * ```
+ *
+ * @param props
+ * @param props.set Icon set
+ * @param props.icon Icon name
+ * @param props.type Icon type - Most of the time an entirely different set of icons
+ * @param props.kind Icon kind - These are variations of the same icon
+ * @param props.raw Get the raw SVG without any post processing
+ * @param props.strokeWidth Normalize `stroke-width` to this value.
+ *  This also applies `vector-effect="non-scaling-stroke"` which will make the
+ *  `stroke-width` absolute and not relative to the size of the icon
+ *  Use this option for more control over the icon's appearance.
+ *  Because every dimension of the icon will need a different `stroke-width`
+ *  this can be set to `''` (empty string) which then allows it to be handled with CSS.
+ *
+ * @returns The SVG data as a string
+ */
+const fetchIconSvg = async (props) => {
+    const url = getIconUrl(props);
+    let svg = (await fetchMemoized(url)).trim();
+    if (props.raw || ['emojicc', 'flags'].includes(props.set))
+        return svg;
+    svg = svg
+        .replace(/(?<=^<svg[^>]*)\s(width|height)="[\d.]+"(?=.*>)/gis, '')
+        .replace(/(^<svg[^>]*?)>/gis, '$1 fill="var(--stroke)">')
+        // these two are weird unnecessary squares in iconpark's icons
+        .replace('<rect width="48" height="48" fill="white" fill-opacity="0.01"/>', '')
+        .replace('<path d="M48 0H0V48H48V0Z" fill="white" fill-opacity="0.01"/>', '');
+    // normalize stroke-width
+    if (props.strokeWidth != null) {
+        svg = svg
+            .replace(/(stroke-width=")([^"]*?)(")/gi, `$1${props.strokeWidth}$3`)
+            .replace(/(<(?:path|circle|rect|polyline)[^>]*?)(\/?>)/gis, '$1 vector-effect="non-scaling-stroke"$2');
+    }
+    svg = svg
+        // these are iconpark's colors but could be extended further
+        .replace(/"#2F88FF"/gis, '"var(--fill)"')
+        .replace(/"#43CCF8"/gis, '"var(--fill-secondary)"')
+        // inherit so we can style with css
+        .replace(/"(currentColor|white|black)"/gis, '"var(--stroke)"');
+    return svg;
+};
+
+const style$1 = ({ strokeWidth }) => /*css*/ `
+:host {
+  ${strokeWidth ? `stroke-width: ${strokeWidth};` : ''}
+  --stroke: currentColor;
+  --fill: #9994;
+  --fill-secondary: #9996;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+[part=svg] {
+  width: 100%;
+  height: 100%;
+}`;
+/**
+ * The `IconSvgElement` custom element.
+ *
+ * For a more complete example with typings check `playground/app.tsx`
+ *
+ * Browser needs to support `Constructible StyleSheets` ([polyfill](https://github.com/calebdwilliams/construct-style-sheets)).
+ *
+ * _JS / TS:_
+ * ```ts
+ * customElements.define('icon-svg', IconSvgElement)
+ * ```
+ *
+ * _CSS:_
+ * ```css
+ * icon-svg {
+ *   width: 32px;
+ *   height: 32px;
+ *   stroke-width: 2.5px;
+ *   --stroke: #fff;
+ *   --fill: #028;
+ *   --fill-secondary: #468;
+ * }
+ * ```
+ *
+ * _HTML:_
+ * ```html
+ * <icon-svg set="boxicons" type="logos" icon="javascript"></icon-svg>
+ * ```
+ */
+class IconSvgElement extends mixter(HTMLElement, shadow(), attrs(class {
+    icon = String;
+    set = String;
+    type = String;
+    kind = String;
+    raw = Boolean;
+    strokeWidth = Number;
+})) {
+    async updateSvg() {
+        const props = {
+            set: this.getAttribute('set'),
+            icon: this.getAttribute('icon'),
+            type: this.getAttribute('type'),
+            kind: this.getAttribute('kind'),
+            raw: this.hasAttribute('raw'),
+            strokeWidth: this.getAttribute('stroke-width'),
+        };
+        if (!propsSatisfyTemplate(props))
+            return;
+        this.shadowRoot.innerHTML = `<style>${style$1(props)}</style>${(await fetchIconSvg(props)).replace(/(<svg.*?)>/, '$1 part="svg">')}`;
+    }
+    attributeChangedCallback() {
+        this.updateSvg();
+    }
+}
+
+const IconSvgTag = fromElement(IconSvgElement);
+const IconSvg = (props) => jsx(IconSvgTag, { ...props, "stroke-width": true });
+IconSvg.toString = IconSvgTag.toString;
+
+document.body.className = 'dark';
+const cssStyle = /*css*/ `
+body {
+  background: #eee;
+  color: #222;
+}
+
+body.dark {
+  background: #272727;
+  color: #eee;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not(.light) {
+    background: #272727;
+    color: #eee;
+  }
+}
+
+${IconSvg} {
+  width: 32px;
+  height: 32px;
+  margin: 2px;
+  stroke-width: 2.5px;
+}
+
+.medium ${IconSvg} {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.9px;
+}
+
+.small ${IconSvg} {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.1px;
+}
+`;
+const style = document.createElement('style');
+style.textContent = cssStyle;
+document.head.appendChild(style);
+const AllSets = () => (jsxs(Fragment, { children: [jsx(IconSvg, { set: "bytesize", icon: "camera" }), jsx(IconSvg, { set: "bootstrap", icon: "calendar3" }), jsx(IconSvg, { set: "bootstrap", icon: "rss" }), jsx(IconSvg, { set: "bootstrap", icon: "peace" }), jsx(IconSvg, { set: "boxicons", type: "logos", icon: "javascript" }), jsx(IconSvg, { set: "boxicons", type: "logos", icon: "internet-explorer" }), jsx(IconSvg, { set: "boxicons", type: "regular", icon: "alarm" }), jsx(IconSvg, { set: "boxicons", type: "regular", icon: "pencil" }), jsx(IconSvg, { set: "boxicons", type: "solid", icon: "alarm" }), jsx(IconSvg, { set: "boxicons", type: "solid", icon: "pencil" }), jsx(IconSvg, { set: "bytesize", icon: "book" }), jsx(IconSvg, { set: "bytesize", icon: "video" }), jsx(IconSvg, { set: "bytesize", icon: "moon" }), jsx(IconSvg, { set: "cssgg", icon: "calendar-dates" }), jsx(IconSvg, { set: "cssgg", icon: "log-out" }), jsx(IconSvg, { set: "cssgg", icon: "magnet" }), jsx(IconSvg, { set: "emojicc", icon: "oncomingTaxi" }), jsx(IconSvg, { set: "emojicc", icon: "paperclip" }), jsx(IconSvg, { set: "emojicc", icon: "handSplayedTone5" }), jsx(IconSvg, { set: "eos", type: "solid", icon: "car_rental" }), jsx(IconSvg, { set: "eos", type: "solid", icon: "chat_bubble" }), jsx(IconSvg, { set: "eos", type: "solid", icon: "biotech" }), jsx(IconSvg, { set: "eos", type: "outlined", icon: "car_rental" }), jsx(IconSvg, { set: "eos", type: "outlined", icon: "chat_bubble" }), jsx(IconSvg, { set: "eos", type: "outlined", icon: "biotech" }), jsx(IconSvg, { set: "feather", icon: "compass" }), jsx(IconSvg, { set: "feather", icon: "mail" }), jsx(IconSvg, { set: "feather", icon: "gift" }), jsx(IconSvg, { set: "flags", icon: "ua", kind: "4x3" }), jsx(IconSvg, { set: "flags", icon: "ru", kind: "4x3" }), jsx(IconSvg, { set: "fontawesome", type: "brands", icon: "java" }), jsx(IconSvg, { set: "fontawesome", type: "regular", icon: "compass" }), jsx(IconSvg, { set: "fontawesome", type: "solid", icon: "compass" }), jsx(IconSvg, { set: "iconoir", icon: "cart" }), jsx(IconSvg, { set: "iconoir", icon: "github" }), jsx(IconSvg, { set: "iconoir", icon: "fingerprint" }), jsx(IconSvg, { set: "iconpark", type: "Abstract", icon: "cube" }), jsx(IconSvg, { set: "iconpark", type: "Arrows", icon: "download" }), jsx(IconSvg, { set: "iconpark", type: "Base", icon: "dislike" }), jsx(IconSvg, { set: "iconpark", type: "Books", icon: "book" }), jsx(IconSvg, { set: "iconpark", type: "Brand", icon: "mitsubishi" }), jsx(IconSvg, { set: "iconpark", type: "Build", icon: "arc-de-triomphe" }), jsx(IconSvg, { set: "iconpark", type: "Character", icon: "bitcoin" }), jsx(IconSvg, { set: "iconpark", type: "Charts", icon: "chart-graph" }), jsx(IconSvg, { set: "iconpark", type: "Child", icon: "heart-ballon" }), jsx(IconSvg, { set: "iconpark", type: "Clothes", icon: "bow" }), jsx(IconSvg, { set: "iconpark", type: "Communicate", icon: "message-unread" }), jsx(IconSvg, { set: "iconpark", type: "Connect", icon: "branch-one" }), jsx(IconSvg, { set: "iconpark", type: "Datas", icon: "database-code" }), jsx(IconSvg, { set: "iconpark", type: "Edit", icon: "calendar" }), jsx(IconSvg, { set: "iconpark", type: "Emoji", icon: "dizzy-face" }), jsx(IconSvg, { set: "iconpark", type: "Foods", icon: "banana" }), jsx(IconSvg, { set: "iconpark", type: "Graphics", icon: "hexagon-one" }), jsx(IconSvg, { set: "iconpark", type: "Hands", icon: "spider-man" }), jsx(IconSvg, { set: "iconpark", type: "Hardware", icon: "chip" }), jsx(IconSvg, { set: "iconpark", type: "Health", icon: "mask" }), jsx(IconSvg, { set: "iconpark", type: "Industry", icon: "oscillator" }), jsx(IconSvg, { set: "iconpark", type: "Life", icon: "beach-umbrella" }), jsx(IconSvg, { set: "iconpark", type: "Makeups", icon: "scissors" }), jsx(IconSvg, { set: "iconpark", type: "Money", icon: "blockchain" }), jsx(IconSvg, { set: "iconpark", type: "Music", icon: "fm" }), jsx(IconSvg, { set: "iconpark", type: "Office", icon: "file-code" }), jsx(IconSvg, { set: "iconpark", type: "Operate", icon: "radio-two" }), jsx(IconSvg, { set: "iconpark", type: "Others", icon: "checklist" }), jsx(IconSvg, { set: "iconpark", type: "Peoples", icon: "user" }), jsx(IconSvg, { set: "iconpark", type: "Sports", icon: "black-eight" }), jsx(IconSvg, { set: "iconpark", type: "Time", icon: "alarm-clock" }), jsx(IconSvg, { set: "iconpark", type: "Travel", icon: "aviation" }), jsx(IconSvg, { set: "iconpark", type: "Weather", icon: "snow" }), jsx(IconSvg, { set: "phosphor", type: "regular", icon: "bezier-curve" }), jsx(IconSvg, { set: "phosphor", type: "regular", icon: "alarm" }), jsx(IconSvg, { set: "phosphor", type: "regular", icon: "airplane-takeoff" })] }));
+render(jsxs(Fragment, { children: [jsx("button", { onclick: () => (document.body.className = 'light'), children: "light" }), jsx("button", { onclick: () => (document.body.className = 'dark'), children: "dark" }), jsxs("div", { id: "demo", style: "width:435px", children: [jsx("div", { class: "large", children: jsx(AllSets, {}) }), jsx("div", { class: "medium", children: jsx(AllSets, {}) }), jsx("div", { class: "small", children: jsx(AllSets, {}) })] })] }), document.body);
+</script>
+  </body>
+</html>

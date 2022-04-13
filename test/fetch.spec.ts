@@ -1,6 +1,5 @@
-import 'construct-style-sheets-polyfill'
 import { inspectWithPreamble } from '@n1kk/intspector'
-import { fetchIconSvg } from '../fetch'
+import { fetchIconSvg } from '../src/fetch'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const window: any
@@ -8,7 +7,7 @@ declare const window: any
 const typeTest = (fn: string) => {
   try {
     inspectWithPreamble(`
-      import { fetchIconSvg } from '../fetch'
+      import { fetchIconSvg } from '../src/fetch'
       ;(window as any).fetch = async () => ({
         ok: true,
         text: async () => 'cool'
@@ -86,11 +85,11 @@ describe('fetchIconSvg', () => {
 
   it('missing type when required', () => {
     expect(typeTest(`fetchIconSvg({ set: 'boxicons', type: 'logos', icon: '99designs' })`)).toEqual(true)
-    expect(typeTest(`fetchIconSvg({ set: 'boxicons', icon: '99designs' })`)).toContain("'type' is missing")
+    expect(typeTest(`fetchIconSvg({ set: 'boxicons', icon: '99designs' })`)).toContain('\'type\' is missing')
   })
 
   it('missing kind when required', () => {
     expect(typeTest(`fetchIconSvg({ set: 'flags', icon: 'gr', kind: '4x3' })`)).toEqual(true)
-    expect(typeTest(`fetchIconSvg({ set: 'flags', icon: 'gr' })`)).toContain("'kind' is missing")
+    expect(typeTest(`fetchIconSvg({ set: 'flags', icon: 'gr' })`)).toContain('\'kind\' is missing')
   })
 })

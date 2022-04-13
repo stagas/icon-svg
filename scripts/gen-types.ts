@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import fetch from 'node-fetch'
 import { memoize } from 'memoize-pure'
+// @ts-ignore
+import fetch from 'node-fetch'
 import { iconSets } from '../src/data'
 
 const parsePkgTemplate = (s: string) => {
@@ -33,7 +34,7 @@ const headers = {
 }
 
 const pickSvg = (x: any) => (x.type === 'file' ? x.name.endsWith('.svg') : true)
-const cleanup = (s: string) => s.replace(/bx\w?-|\.svg/gm, '')
+const cleanup = (s: string, t = '') => s.replace(/bx\w?-|\.svg/gm, '').replace(t ? '-' + t : '', '')
 
 const print = (s: string) => process.stdout.write(s + '\n')
 
@@ -70,19 +71,23 @@ const getIcons = async (pkg: string) => {
     for (const t of dir) {
       if (t.type !== 'directory') continue
       print(
-        `    ${t.name}: ${t.files
-          .filter(pickSvg)
-          .map((x: any) => JSON.stringify(cleanup(x.name)))
-          .join(' | ')}`
+        `    ${t.name}: ${
+          t.files
+            .filter(pickSvg)
+            .map((x: any) => JSON.stringify(cleanup(x.name, t.name)))
+            .join(' | ')
+        }`
       )
     }
     print(`  }`)
   } else {
     print(
-      `  ${pkg}: ${dir
-        .filter(pickSvg)
-        .map((x: any) => JSON.stringify(cleanup(x.name)))
-        .join(' | ')}`
+      `  ${pkg}: ${
+        dir
+          .filter(pickSvg)
+          .map((x: any) => JSON.stringify(cleanup(x.name)))
+          .join(' | ')
+      }`
     )
   }
 }
@@ -101,10 +106,12 @@ const getIconTypes = async (pkg: string) => {
   }
 
   print(
-    `  ${pkg}: ${dir
-      .filter((x: any) => x.type === 'directory')
-      .map((x: any) => JSON.stringify(cleanup(x.name)))
-      .join(' | ')}`
+    `  ${pkg}: ${
+      dir
+        .filter((x: any) => x.type === 'directory')
+        .map((x: any) => JSON.stringify(cleanup(x.name)))
+        .join(' | ')
+    }`
   )
 }
 
@@ -122,33 +129,32 @@ const getIconKinds = async (pkg: string) => {
   }
 
   print(
-    `  ${pkg}: ${dir
-      .filter((x: any) => x.type === (template.includes('{kind}.svg') ? 'file' : 'directory'))
-      .filter((x: any) => (template.includes('{kind}.svg') ? x.name.endsWith('.svg') : true))
-      .map((x: any) => JSON.stringify(cleanup(x.name)))
-      .join(' | ')}`
+    `  ${pkg}: ${
+      dir
+        .filter((x: any) => x.type === (template.includes('{kind}.svg') ? 'file' : 'directory'))
+        .filter((x: any) => (template.includes('{kind}.svg') ? x.name.endsWith('.svg') : true))
+        .map((x: any) => JSON.stringify(cleanup(x.name)))
+        .join(' | ')
+    }`
   )
 }
 
 const main = async () => {
   print('export interface Icons {')
-  for (const pkg in iconSets) {
+  for (const pkg in iconSets)
     await getIcons(pkg)
-  }
   print('}')
   print('')
 
   print('export interface IconTypes {')
-  for (const pkg in iconSets) {
+  for (const pkg in iconSets)
     await getIconTypes(pkg)
-  }
   print('}')
   print('')
 
   print('export interface IconKinds {')
-  for (const pkg in iconSets) {
+  for (const pkg in iconSets)
     await getIconKinds(pkg)
-  }
   print('}')
 }
 

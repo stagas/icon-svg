@@ -1,39 +1,21 @@
-import { getIconUrl, fetchIconSvg, propsSatisfyTemplate } from '.'
+import { attrs, mixter, shadow } from 'mixter'
+import { fetchIconSvg } from './fetch'
+import { propsSatisfyTemplate } from './icon-svg'
 
-export type HTMLIconSvgElement = Parameters<typeof getIconUrl>[0] & {
-  raw?: boolean
-  'stroke-width'?: string | number | boolean
+const style = ({ strokeWidth }: { strokeWidth?: string | number | null }) => /*css*/ `
+:host {
+  ${strokeWidth ? `stroke-width: ${strokeWidth};` : ''}
+  --stroke: currentColor;
+  --fill: #9994;
+  --fill-secondary: #9996;
+  display: inline-flex;
+  vertical-align: middle;
 }
 
-declare global {
-  interface CSSStyleSheet {
-    replace(css: string): Promise<void>
-    replaceSync(css: string): void
-  }
-  interface ShadowRoot {
-    adoptedStyleSheets: readonly CSSStyleSheet[]
-  }
-}
-
-const style = new CSSStyleSheet()
-
-const replaceStyle = ({ strokeWidth }: { strokeWidth: string | number | null }) => {
-  style.replaceSync(/*css*/ `
-    :host {
-      ${strokeWidth ? `stroke-width: ${strokeWidth};` : ''}
-      --stroke: currentColor;
-      --fill: #9994;
-      --fill-secondary: #9996;
-      display: inline-flex;
-      vertical-align: middle;
-    }
-
-    [part=svg] {
-      width: 100%;
-      height: 100%;
-    }
-  `)
-}
+[part=svg] {
+  width: 100%;
+  height: 100%;
+}`
 
 /**
  * The `IconSvgElement` custom element.
@@ -64,17 +46,20 @@ const replaceStyle = ({ strokeWidth }: { strokeWidth: string | number | null }) 
  * <icon-svg set="boxicons" type="logos" icon="javascript"></icon-svg>
  * ```
  */
-export class IconSvgElement extends HTMLElement {
-  static get observedAttributes() {
-    return ['icon', 'set', 'type', 'kind', 'raw', 'stroke-width']
-  }
-
-  constructor() {
-    super()
-    this.attachShadow({ mode: 'open' }).adoptedStyleSheets = [style]
-    this.updateSvg()
-  }
-
+export class IconSvgElement extends mixter(
+  HTMLElement,
+  shadow(),
+  attrs(
+    class {
+      icon = String
+      set = String
+      type = String
+      kind = String
+      raw = Boolean
+      strokeWidth = Number
+    }
+  )
+) {
   async updateSvg() {
     const props = {
       set: this.getAttribute('set'),
@@ -86,8 +71,9 @@ export class IconSvgElement extends HTMLElement {
     }
     if (!propsSatisfyTemplate(props)) return
 
-    replaceStyle(props)
-    this.shadowRoot!.innerHTML = (await fetchIconSvg(props as never)).replace(/(<svg.*?)>/, '$1 part="svg">')
+    this.shadowRoot!.innerHTML = `<style>${style(props)}</style>${
+      (await fetchIconSvg(props as never)).replace(/(<svg.*?)>/, '$1 part="svg">')
+    }`
   }
 
   attributeChangedCallback() {

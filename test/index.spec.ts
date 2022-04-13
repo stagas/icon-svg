@@ -1,6 +1,5 @@
-import 'construct-style-sheets-polyfill'
 import { inspectWithPreamble } from '@n1kk/intspector'
-import { getIconUrl } from '../'
+import { getIconUrl } from '../src/icon-svg'
 
 const typeTest = (fn: string) => {
   try {
@@ -39,11 +38,11 @@ describe('getIconUrl', () => {
 
   it('missing type when required', () => {
     expect(typeTest(`getIconUrl({ set: 'boxicons', type: 'logos', icon: '99designs' })`)).toEqual(true)
-    expect(typeTest(`getIconUrl({ set: 'boxicons', icon: '99designs' })`)).toContain("'type' is missing")
+    expect(typeTest(`getIconUrl({ set: 'boxicons', icon: '99designs' })`)).toContain('\'type\' is missing')
   })
 
   it('missing kind when required', () => {
     expect(typeTest(`getIconUrl({ set: 'flags', icon: 'gr', kind: '4x3' })`)).toEqual(true)
-    expect(typeTest(`getIconUrl({ set: 'flags', icon: 'gr' })`)).toContain("'kind' is missing")
+    expect(typeTest(`getIconUrl({ set: 'flags', icon: 'gr' })`)).toContain('\'kind\' is missing')
   })
 })

@@ -1,5 +1,4 @@
-import 'construct-style-sheets-polyfill'
-import { IconSvgElement } from '../element'
+import { IconSvgElement } from '../src/element'
 
 describe('IconSvgElement', () => {
   it('registers', () => {
@@ -13,8 +12,7 @@ describe('IconSvgElement', () => {
   })
 
   it('creates icon svg when it has the necessary attributes', done => {
-    let fetchUrl: string
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let fetchUrl: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(window as any).fetch = async (url: string) => {
       fetchUrl = url
       return {

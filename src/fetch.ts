@@ -1,5 +1,7 @@
 import { memoize } from 'memoize-pure'
-import { getIconUrl, IconSets, IconSetsNames, IconsWithTypes, Icons, IconTypes, IconKinds } from '.'
+import { IconSets, IconSetsNames, IconsWithTypes } from './data'
+import { getIconUrl } from './icon-svg'
+import { IconKinds, Icons, IconTypes } from './types'
 
 const fetchMemoized = memoize(async (url: string) => {
   const response = await fetch(url)
@@ -60,21 +62,22 @@ export interface FetchProps {
  * @returns The SVG data as a string
  */
 export const fetchIconSvg = async <P extends keyof IconSets<IconSetsNames>, T extends IconTypes[P & keyof IconTypes]>(
-  props: FetchProps & {
-    set: P
-  } & (P extends keyof IconKinds
-      ? {
-          icon: Icons[P]
-          kind: IconKinds[P & keyof IconKinds]
-        }
-      : P extends keyof IconTypes
-      ? {
-          icon: IconsWithTypes[P & keyof IconsWithTypes][T & keyof IconsWithTypes[P & keyof IconsWithTypes]]
-          type: T
-        }
+  props:
+    & FetchProps
+    & {
+      set: P
+    }
+    & (P extends keyof IconKinds ? {
+      icon: Icons[P]
+      kind: IconKinds[P & keyof IconKinds]
+    }
+      : P extends keyof IconTypes ? {
+        icon: IconsWithTypes[P & keyof IconsWithTypes][T & keyof IconsWithTypes[P & keyof IconsWithTypes]]
+        type: T
+      }
       : {
-          icon: Icons[P & keyof Icons]
-        })
+        icon: Icons[P & keyof Icons]
+      }),
 ) => {
   const url = getIconUrl(props as never)
   let svg = (await fetchMemoized(url)).trim()
@@ -84,22 +87,21 @@ export const fetchIconSvg = async <P extends keyof IconSets<IconSetsNames>, T ex
   svg = svg
     .replace(/(?<=^<svg[^>]*)\s(width|height)="[\d.]+"(?=.*>)/gis, '')
     .replace(/(^<svg[^>]*?)>/gis, '$1 fill="var(--stroke)">')
-
     // these two are weird unnecessary squares in iconpark's icons
     .replace('<rect width="48" height="48" fill="white" fill-opacity="0.01"/>', '')
     .replace('<path d="M48 0H0V48H48V0Z" fill="white" fill-opacity="0.01"/>', '')
 
   // normalize stroke-width
-  if (props.strokeWidth != null)
+  if (props.strokeWidth != null) {
     svg = svg
       .replace(/(stroke-width=")([^"]*?)(")/gi, `$1${props.strokeWidth as string}$3`)
       .replace(/(<(?:path|circle|rect|polyline)[^>]*?)(\/?>)/gis, '$1 vector-effect="non-scaling-stroke"$2')
+  }
 
   svg = svg
     // these are iconpark's colors but could be extended further
     .replace(/"#2F88FF"/gis, '"var(--fill)"')
     .replace(/"#43CCF8"/gis, '"var(--fill-secondary)"')
-
     // inherit so we can style with css
     .replace(/"(currentColor|white|black)"/gis, '"var(--stroke)"')
 

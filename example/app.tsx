@@ -1,39 +1,54 @@
-import 'construct-style-sheets-polyfill'
+/** @jsxImportSource html-vdom */
 
-import { h, Fragment, render } from 'vdomini'
-import { IconSvgElement, HTMLIconSvgElement, Icons, IconKinds, IconTypes, IconSets, IconSetsNames, IconsWithTypes } from '../src'
+import { render } from 'html-vdom'
+import { IconSvg } from '../src'
 
-customElements.define('icon-svg', IconSvgElement)
+document.body.className = 'dark'
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'icon-svg': HTMLIconSvgElement & HTMLAttributes<IconSvgElement>
-    }
+const cssStyle = /*css*/ `
+body {
+  background: #eee;
+  color: #222;
+}
+
+body.dark {
+  background: #272727;
+  color: #eee;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not(.light) {
+    background: #272727;
+    color: #eee;
   }
 }
 
-const IconSvg = <P extends keyof IconSets<IconSetsNames>, T extends IconTypes[P & keyof IconTypes]>(
-  props: P extends keyof IconKinds
-    ? {
-        set: P
-        icon: Icons[P]
-        kind: IconKinds[P & keyof IconKinds]
-      }
-    : P extends keyof IconTypes
-    ? {
-        set: P
-        icon: IconsWithTypes[P & keyof IconsWithTypes][T & keyof IconsWithTypes[P & keyof IconsWithTypes]]
-        type: T
-      }
-    : {
-        set: P
-        icon: Icons[P & keyof Icons]
-      }
-) => <icon-svg {...props} stroke-width></icon-svg>
+${IconSvg} {
+  width: 32px;
+  height: 32px;
+  margin: 2px;
+  stroke-width: 2.5px;
+}
+
+.medium ${IconSvg} {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.9px;
+}
+
+.small ${IconSvg} {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.1px;
+}
+`
+const style = document.createElement('style')
+style.textContent = cssStyle
+document.head.appendChild(style)
 
 const AllSets = () => (
   <>
+    <IconSvg set="bytesize" icon="camera" />
     <IconSvg set="bootstrap" icon="calendar3" />
     <IconSvg set="bootstrap" icon="rss" />
     <IconSvg set="bootstrap" icon="peace" />
@@ -69,8 +84,8 @@ const AllSets = () => (
     <IconSvg set="feather" icon="mail" />
     <IconSvg set="feather" icon="gift" />
 
-    <IconSvg set="flags" icon="gr" kind="4x3" />
-    <IconSvg set="flags" icon="jm" kind="4x3" />
+    <IconSvg set="flags" icon="ua" kind="4x3" />
+    <IconSvg set="flags" icon="ru" kind="4x3" />
 
     <IconSvg set="fontawesome" type="brands" icon="java" />
     <IconSvg set="fontawesome" type="regular" icon="compass" />
@@ -113,6 +128,10 @@ const AllSets = () => (
     <IconSvg set="iconpark" type="Time" icon="alarm-clock" />
     <IconSvg set="iconpark" type="Travel" icon="aviation" />
     <IconSvg set="iconpark" type="Weather" icon="snow" />
+
+    <IconSvg set="phosphor" type="regular" icon="bezier-curve" />
+    <IconSvg set="phosphor" type="regular" icon="alarm" />
+    <IconSvg set="phosphor" type="regular" icon="airplane-takeoff" />
   </>
 )
 
@@ -120,15 +139,16 @@ render(
   <>
     <button onclick={() => (document.body.className = 'light')}>light</button>
     <button onclick={() => (document.body.className = 'dark')}>dark</button>
-
-    <div class="large">
-      <AllSets />
-    </div>
-    <div class="medium">
-      <AllSets />
-    </div>
-    <div class="small">
-      <AllSets />
+    <div id="demo" style="width:435px">
+      <div class="large">
+        <AllSets />
+      </div>
+      <div class="medium">
+        <AllSets />
+      </div>
+      <div class="small">
+        <AllSets />
+      </div>
     </div>
   </>,
   document.body
