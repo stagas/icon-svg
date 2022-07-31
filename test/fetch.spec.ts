@@ -1,5 +1,7 @@
-import { inspectWithPreamble } from '@n1kk/intspector'
+import { inspectWithPreamble, setOptions } from '@n1kk/intspector'
 import { fetchIconSvg } from '../src/fetch'
+
+setOptions(require('../tsconfig.json'), true)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const window: any

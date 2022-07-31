@@ -25,13 +25,13 @@ export const getIconUrl = <P extends keyof IconSets<IconSetsNames>, T extends Ic
       set: P
     }
     & (P extends keyof IconKinds ? {
-      icon: Icons[P]
-      kind: IconKinds[P & keyof IconKinds]
-    }
-      : P extends keyof IconTypes ? {
-        icon: IconsWithTypes[P & keyof IconsWithTypes][T & keyof IconsWithTypes[P & keyof IconsWithTypes]]
-        type: T
+        icon: Icons[P]
+        kind: IconKinds[P & keyof IconKinds]
       }
+      : P extends keyof IconTypes ? {
+          icon: IconsWithTypes[P & keyof IconsWithTypes][T & keyof IconsWithTypes[P & keyof IconsWithTypes]]
+          type: T
+        }
       : {
         icon: Icons[P & keyof Icons]
       }),

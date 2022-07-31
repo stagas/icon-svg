@@ -1,5 +1,7 @@
-import { inspectWithPreamble } from '@n1kk/intspector'
+import { inspectWithPreamble, setOptions } from '@n1kk/intspector'
 import { getIconUrl } from '../src/icon-svg'
+
+setOptions(require('../tsconfig.json'), true)
 
 const typeTest = (fn: string) => {
   try {

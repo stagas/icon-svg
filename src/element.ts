@@ -1,4 +1,5 @@
-import { attrs, mixter, shadow } from 'mixter'
+import $ from 'sigl'
+
 import { fetchIconSvg } from './fetch'
 import { propsSatisfyTemplate } from './icon-svg'
 
@@ -16,6 +17,8 @@ const style = ({ strokeWidth }: { strokeWidth?: string | number | null }) => /*c
   width: 100%;
   height: 100%;
 }`
+
+export interface IconSvgElement extends $.Element<IconSvgElement> {}
 
 /**
  * The `IconSvgElement` custom element.
@@ -46,20 +49,17 @@ const style = ({ strokeWidth }: { strokeWidth?: string | number | null }) => /*c
  * <icon-svg set="boxicons" type="logos" icon="javascript"></icon-svg>
  * ```
  */
-export class IconSvgElement extends mixter(
-  HTMLElement,
-  shadow(),
-  attrs(
-    class {
-      icon = String
-      set = String
-      type = String
-      kind = String
-      raw = Boolean
-      strokeWidth = Number
-    }
-  )
-) {
+@$.element()
+export class IconSvgElement extends HTMLElement {
+  @$.attr() icon = $.String
+  @$.attr() set = $.String
+  @$.attr() type = $.String
+  @$.attr() kind = $.String
+  @$.attr() raw = $.Boolean
+  @$.attr() strokeWidth = $.Number
+
+  root = $.shadow(this)
+
   async updateSvg() {
     const props = {
       set: this.getAttribute('set'),

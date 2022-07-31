@@ -1,0 +1,2 @@
+
+exports[`IconSvgElement creates icon svg when it has the necessary attributes 1`] = `"https://cdn.jsdelivr.net/npm/feather-icons@4/dist/icons/award.svg"`;
