@@ -23,6 +23,6 @@ export const IconSvg = <P extends keyof IconSets<IconSetsNames>, T extends IconT
         icon: Icons[P & keyof Icons]
       })
     & $.HTMLAttributes<IconSvgElement>,
-) => <IconSvgTag {...props}></IconSvgTag>
+): JSX.Element => <IconSvgTag {...props}></IconSvgTag>
 
 IconSvg.toString = IconSvgTag.toString
