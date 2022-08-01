@@ -1,5 +1,5 @@
 <h1>
-icon-svg <a href="https://npmjs.org/package/icon-svg"><img src="https://img.shields.io/badge/npm-v3.0.3-F00.svg?colorA=000"/></a> <a href="src"><img src="https://img.shields.io/badge/loc-25,614-FFF.svg?colorA=000"/></a> <a href="https://cdn.jsdelivr.net/npm/icon-svg@3.0.3/dist/icon-svg.min.js"><img src="https://img.shields.io/badge/brotli-16.8K-333.svg?colorA=000"/></a> <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-F0B.svg?colorA=000"/></a>
+icon-svg <a href="https://npmjs.org/package/icon-svg"><img src="https://img.shields.io/badge/npm-v3.0.4-F00.svg?colorA=000"/></a> <a href="src"><img src="https://img.shields.io/badge/loc-25,614-FFF.svg?colorA=000"/></a> <a href="https://cdn.jsdelivr.net/npm/icon-svg@3.0.4/dist/icon-svg.min.js"><img src="https://img.shields.io/badge/brotli-16.8K-333.svg?colorA=000"/></a> <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-F0B.svg?colorA=000"/></a>
 </h1>
 
 <p></p>
@@ -256,7 +256,6 @@ getIconUrl({ set: 'flags', icon: 'gr', kind: '4x3' })
 
 ## Credits
 
-- [html-vdom](https://npmjs.org/package/html-vdom) by [stagas](https://github.com/stagas) &ndash; JSX virtual DOM using standard HTML
 - [memoize-pure](https://npmjs.org/package/memoize-pure) by [stagas](https://github.com/stagas) &ndash; low footprint memoize for just pure sync functions with scalar arguments
 - [sigl](https://npmjs.org/package/sigl) by [stagas](https://github.com/stagas) &ndash; Web framework
 
