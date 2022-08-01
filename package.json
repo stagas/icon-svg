@@ -85,7 +85,6 @@
     "vite-open": "^3.0.1"
   },
   "dependencies": {
-    "html-vdom": "^2.2.3",
     "memoize-pure": "^1.0.0",
     "sigl": "^1.0.0"
   },
