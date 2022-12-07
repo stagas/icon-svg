@@ -84,8 +84,12 @@ export const fetchIconSvg = async <P extends keyof IconSets<IconSetsNames>, T ex
 
   if (props.raw || ['emojicc', 'flags'].includes(props.set)) return svg
 
+  try {
+    // webkit breaks for flag 's'
+    svg = svg.replace(new RegExp(`(?<=^<svg[^>]*)\\s(width|height)="[\\d.]+"(?=.*>)`, 'gis'), '')
+  } catch {}
+
   svg = svg
-    .replace(/(?<=^<svg[^>]*)\s(width|height)="[\d.]+"(?=.*>)/gis, '')
     .replace(/(^<svg[^>]*?)>/gis, '$1 fill="var(--stroke)">')
     // these two are weird unnecessary squares in iconpark's icons
     .replace('<rect width="48" height="48" fill="white" fill-opacity="0.01"/>', '')
